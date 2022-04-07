@@ -2,6 +2,8 @@ package org.craftedsw.tripservicekata.trip;
 
 import org.craftedsw.tripservicekata.exception.UserNotLoggedInException;
 import org.craftedsw.tripservicekata.user.User;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Assertions;
 import java.util.List;
@@ -12,35 +14,37 @@ public class TripServiceTest {
 
     private User loggedUser;
     final private User GUEST = null;
-    final private User LOGGED_USER = new User();
+    private User LOGGED_USER;
     final private User TRIET = new User();
     final private User MAI = new User();
     final private Trip TO_VN = new Trip();
     final private Trip TO_CANADA = new Trip();
     final private Trip TO_USA = new Trip();
-    final private TestableTripService tripService = new TestableTripService();
+    private TestableTripService tripService;
+
+    @BeforeEach
+    public void initialize() {
+        tripService = new TestableTripService();
+        LOGGED_USER = new User();
+    }
 
     @Test void
     should_throw_an_exception_when_user_is_not_logged_in() {
-        loggedUser = GUEST;
-
-        Assertions.assertThrows(UserNotLoggedInException.class, () -> tripService.getTripsByUser(loggedUser));
+        Assertions.assertThrows(UserNotLoggedInException.class, () -> tripService.getTripsByUser(GUEST, null));
     }
 
     @Test void
     should_return_empty_list_if_user_is_not_friend() {
         User friend = aUser().friendWith(TRIET).withTrips(TO_CANADA).build();
-        loggedUser = LOGGED_USER;
 
-        Assertions.assertEquals(tripService.getTripsByUser(friend).size(), 0);
+        Assertions.assertEquals(0, tripService.getTripsByUser(friend, LOGGED_USER).size());
     }
 
     @Test void
     should_return_trip_list_if_user_is_friend() {
-        loggedUser = LOGGED_USER;
-        User friend = aUser().friendWith(loggedUser).withTrips(TO_CANADA, TO_USA, TO_VN).build();
+        User friend = aUser().friendWith(LOGGED_USER).withTrips(TO_CANADA, TO_USA, TO_VN).build();
 
-        Assertions.assertEquals(tripService.getTripsByUser(friend).size(), 3);
+        Assertions.assertEquals(3, tripService.getTripsByUser(friend, LOGGED_USER).size());
 
     }
 
