@@ -4,21 +4,24 @@ import org.craftedsw.tripservicekata.exception.UserNotLoggedInException;
 import org.craftedsw.tripservicekata.user.User;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.function.Executable;
-import org.springframework.util.Assert;
-
 import java.util.List;
+
+import static org.craftedsw.tripservicekata.trip.UserBuilder.aUser;
 
 public class TripServiceTest {
 
     private User loggedUser;
     final private User GUEST = null;
     final private User LOGGED_USER = new User();
+    final private User TRIET = new User();
+    final private User MAI = new User();
+    final private Trip TO_VN = new Trip();
+    final private Trip TO_CANADA = new Trip();
+    final private Trip TO_USA = new Trip();
+    final private TestableTripService tripService = new TestableTripService();
 
     @Test void
     should_throw_an_exception_when_user_is_not_logged_in() {
-        TestableTripService tripService = new TestableTripService();
-
         loggedUser = GUEST;
 
         Assertions.assertThrows(UserNotLoggedInException.class, () -> tripService.getTripsByUser(loggedUser));
@@ -26,27 +29,18 @@ public class TripServiceTest {
 
     @Test void
     should_return_empty_list_if_user_is_not_friend() {
-        TestableTripService tripService = new TestableTripService();
-
+        User friend = aUser().friendWith(TRIET).withTrips(TO_CANADA).build();
         loggedUser = LOGGED_USER;
 
-        Assertions.assertEquals(tripService.getTripsByUser(loggedUser).size(), 0);
+        Assertions.assertEquals(tripService.getTripsByUser(friend).size(), 0);
     }
 
     @Test void
     should_return_trip_list_if_user_is_friend() {
-        TestableTripService tripService = new TestableTripService();
-
         loggedUser = LOGGED_USER;
-        User friend = new User();
-        friend.addFriend(loggedUser);
+        User friend = aUser().friendWith(loggedUser).withTrips(TO_CANADA, TO_USA, TO_VN).build();
 
-        friend.addTrip(new Trip());
-        friend.addTrip(new Trip());
-        friend.addTrip(new Trip());
-        friend.addTrip(new Trip());
-
-        Assertions.assertEquals(tripService.getTripsByUser(friend).size(), 4);
+        Assertions.assertEquals(tripService.getTripsByUser(friend).size(), 3);
 
     }
 
@@ -62,3 +56,4 @@ public class TripServiceTest {
         }
     }
 }
+
